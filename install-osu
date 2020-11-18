@@ -1,0 +1,184 @@
+#!/bin/bash
+
+
+echo "ROOT IS REQUIRED TO ADD OSU TO /usr/bin and /usr/share"
+sudo echo "Thanks!"
+
+if [[ $? != 0 ]] ; then
+  exit
+fi
+
+# Styling
+BORDER="========================================================================"
+
+print_sect () {
+  echo $BORDER
+  echo "$1"
+  echo $BORDER
+}
+
+print_sect "ATTENTION: THIS SCRIPT ASSUMES WINE AND WINETRICKS ARE ALREADY INSTALLED"
+echo "See https://osu.ppy.sh/community/forums/topics/367783"
+
+
+
+# Wine environ
+export WINEPREFIX="$HOME/osu-wine"
+export WINEARCH=win32
+
+
+
+# COMMANDS
+WINETRICKS="winetricks"
+WINETRICKS_CREATE_PREFIX="$WINETRICKS -q dotnet462 cjkfonts gdiplus"
+WINETRICKS_ALSA="$WINETRICKS sound=alsa"
+WINECFG="winecfg"
+
+
+# Create wineprefix
+print_sect "CREATING WINEPREFIX"
+$WINETRICKS_CREATE_PREFIX
+
+
+# Manual winecfg step
+print_sect "MANUAL STEP"
+echo "> \"navigate to graphics and ensure that "allow the window manager to decorate the windows" and "allow the window manager to control the windows" are enabled. this can allow native fullscreen to work which can help performance on bloated desktop environments like gnome\""
+
+$WINECFG
+
+print_sect "ALSA"
+
+if [[ "$ALSATWEAK" == "true" ]]; then
+  $WINETRICKS_ALSA
+else
+  echo "SKIPPING ALSA TWEAK"
+fi
+
+
+# dsound tweak
+print_sect "dsound tweak"
+cat > dsound.reg << "EOF"
+
+Windows Registry Editor Version 5.00
+
+
+[HKEY_CURRENT_USER\Software\Wine\DirectSound]
+
+"HelBuflen"="512"
+
+"SndQueueMax"="3"
+
+EOF
+
+wine regedit dsound.reg
+
+print_sect "osu! installer step. PLEASE CLOSE OSU WHEN LAUNCHED."
+# osu! Installer
+DL_PATH="$HOME/Downloads"
+
+if [[ -e "$DL_PATH/osu!install.exe" ]]; then
+  echo "osu! installer already downloaded!"
+else
+  wget 'https://m1.ppy.sh/r/osu!install.exe' -P "$DL_PATH"
+fi
+
+wine "$DL_PATH/osu!install.exe" &> /dev/null
+
+rm "$HOME/Downloads/osu!install.exe"
+
+
+print_sect "POST INSTALL STEPS"
+# Post install
+# When editing this variable, please remember that other parts of this script hardcode the default value (see further down).
+OSU_SC_PATH="$HOME/osu"
+
+ln -sv "$HOME/osu-wine/drive_c/users/$USER/Local Settings/Application Data/osu!" "$OSU_SC_PATH"
+
+rm dsound.reg
+
+
+# Launch script
+
+print_sect "REQUESTING ROOT ACCESS TO ADD OSU TO /usr/bin"
+
+cat > osu << "EOF"
+#!/bin/sh
+
+
+export vblank_mode=0
+
+export WINEARCH=win32
+
+export WINEPREFIX=$HOME/osu-wine
+
+wine "$HOME/osu/osu!.exe" "$@"
+
+EOF
+
+
+sudo mv osu /usr/bin/
+sudo chmod +x /usr/bin/osu
+
+
+
+# Kill script
+cat > osukill << "EOF"
+#!/bin/sh
+
+
+export vblank_mode=0
+
+export WINEARCH=win32
+
+export WINEPREFIX=$HOME/osu-wine
+
+wineserver -k
+
+EOF
+
+
+sudo mv osukill /usr/bin/
+sudo chmod +x /usr/bin/osukill
+
+
+
+print_sect "REQUESTING ROOT ACCESS TO ADD OSU DESKTOP FILE TO /usr/share"
+
+# Desktop file
+
+OSU_LOGO_URL="https://i.ppy.sh/916068c8e2d5f90be7766da5ce0ee7a7ea6c99b3/68747470733a2f2f6f73752e7070792e73682f68656c702f77696b692f4272616e645f6964656e746974795f67756964656c696e65732f696d672f75736167652d66756c6c2d636f6c6f75722e706e67"
+
+sudo wget "$OSU_LOGO_URL" -O "/usr/share/icons/osulogo.png"
+
+cat > "$HOME/osu-wine/osu!.desktop" << "EOF"
+[Desktop Entry]
+
+Encoding=UTF-8
+
+Name=osu!
+
+Comment=A free-to-win rhythm game. Rhythm is just a click away!
+
+Type=Application
+
+Exec=osu %F
+
+Icon=osulogo
+
+StartupWMClass=osu!.exe
+
+Categories=
+
+EOF
+
+sudo mv "$HOME/osu-wine/osu!.desktop" "/usr/share/applications"
+sudo chmod +x "/usr/share/applications/osu!.desktop"
+
+
+
+
+
+
+
+# Finished!
+print_sect "Finished!"

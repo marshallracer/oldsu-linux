@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export WINEPREFIX="$HOME/osu-wine"
+
+wine winediscordipcbridge.exe
+
+osu
