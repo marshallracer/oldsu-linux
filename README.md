@@ -8,7 +8,7 @@ Yet another osu-wine installer! This one basically just goes through the steps l
 2. `git clone https://github.com/mrniceguy127/osu-wine-install-script.git`
 3. `cd osu-wine-install-script`
 4. `./install-osu` When you see the winecfg window pop up, make sure to follow the instructions shown in the terminal. osu! will also launch at some point, so make sure to close it when it does.
-  * If you want to use the alsa tweak (see guid linked at the top), do `ALSATWEAK="true" ./install-osu`. I made this an option because it gave me a lot of audio problems (extremely fast/staticy/distorted).
+  * If you want to use the alsa tweak (see guide linked at the top), do `ALSATWEAK="true" ./install-osu`. I made this an option because it gave me a lot of audio problems (extremely fast/staticy/distorted).
 5. Launch osu. You can either type `osu` in the command line, or if you like GUI's, you can just search "osu" in whatever application launcher you might have. Use the command `osukill` to force kill osu.
 
 # Discord Rich Presence
