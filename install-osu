@@ -1,6 +1,7 @@
 #!/bin/bash
 
-set -e # play it safe
+
+#set -e # play it safe      # Causes problems apparently...
 
 echo "ROOT IS REQUIRED TO ADD OSU TO /usr/bin and /usr/share"
 sudo echo "Thanks!"
