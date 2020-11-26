@@ -11,7 +11,7 @@ Yet another osu-wine installer! This one basically just goes through the steps l
   * If you want to use the alsa tweak (see guide linked at the top), do `ALSATWEAK="true" ./install-osu`. I made this an option because it gave me a lot of audio problems (extremely fast/staticy/distorted).
 5. Launch osu. You can either type `osu` in the command line, or if you like GUI's, you can just search "osu" in whatever application launcher you might have. Use the command `osukill` to force kill osu.
 
-You can also specifiy your own WINEPREFIX, WINESERVER, WINE, WINECFG, and WINETRICKS in your environment. Defaults are used otherwise of course. e.g. `WINEPREFIX="..." WINE="..." WINESERVER="..." WINE="..." WINECFG="..." ./install-osu`
+You can also specifiy your own WINEPREFIX, WINESERVER, WINE, WINECFG, and WINETRICKS in your environment. Defaults are used otherwise of course. e.g. `WINEPREFIX="..." WINE="..." WINESERVER="..." WINECFG="..." ./install-osu`
 
 # Discord Rich Presence
 
