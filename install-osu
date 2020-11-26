@@ -48,8 +48,7 @@ export WINEARCH=win32
 
 # COMMANDS
 WINETRICKS_CREATE_PREFIX="$WINETRICKS -q dotnet462 cjkfonts gdiplus"
-WINETRICKS_ALSA="$WINETRICKS sound=alsa"https://github.com/mrniceguy127/osu-wine-install-script
-
+WINETRICKS_ALSA="$WINETRICKS sound=alsa"
 
 # Create wineprefix
 print_sect "CREATING WINEPREFIX"
@@ -61,7 +60,7 @@ print_sect "MANUAL STEP"
 echo "> \"navigate to graphics and ensure that "allow the window manager to decorate the windows" and "allow the window manager to control the windows" are enabled. this can allow native fullscreen to work which can help performance on bloated desktop environments like gnome\""
 echo "See https://osu.ppy.sh/community/forums/topics/367783"
 
-$WINECFG
+"$WINECFG"
 
 print_sect "ALSA"
 
@@ -98,7 +97,7 @@ else
   wget 'https://m1.ppy.sh/r/osu!install.exe'
 fi
 
-$WINE "osu!install.exe"
+"$WINE" "osu!install.exe"
 
 
 print_sect "POST INSTALL STEPS"
