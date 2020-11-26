@@ -2,6 +2,6 @@
 
 export WINEPREFIX="$HOME/osu-wine"
 
-wine winediscordipcbridge.exe
+wine winediscordipcbridge.exe &
 
 osu
