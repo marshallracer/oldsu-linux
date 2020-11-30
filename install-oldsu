@@ -30,7 +30,7 @@ print_sect "ATTENTION: THIS SCRIPT ASSUMES WINE AND WINETRICKS ARE ALREADY INSTA
 
 # Wine environ
 if [[ ! -n "$WINEPREFIX" ]] ; then
-  export WINEPREFIX="$HOME/Games/osu-wine"
+  export WINEPREFIX="$HOME/Games/oldsu-wine"
 fi
 if [[ ! -n "$WINE" ]] ; then
   export WINE="wine"
@@ -90,7 +90,7 @@ EOF
 
 "$WINE" regedit dsound.reg
 
-print_sect "oldsu! installer step. PLEASE CLOSE OSU WHEN LAUNCHED."
+print_sect "oldsu! installer step. PLEASE CLOSE OLDSU WHEN LAUNCHED."
 # oldsu! Installer
 
 if [[ -e "Compatibility.zip" ]]; then
@@ -132,13 +132,13 @@ echo "export WINEPREFIX=\"$WINEPREFIX\""  >> oldsu
 echo "\"$WINE\" \"$WINEPREFIX/drive_c/users/\$USER/Local Settings/Application Data/oldsu!/osu!flandremod.exe\" \"\$@\"" >> oldsu
 
 
-sudo mv osu /usr/bin/oldsu
+sudo mv oldsu /usr/bin/oldsu
 sudo chmod +x /usr/bin/oldsu
 
 
 
 # Kill script
-cat > osukill << "EOF"
+cat > oldsukill << "EOF"
 #!/bin/sh
 
 
