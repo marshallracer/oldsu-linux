@@ -72,6 +72,8 @@ else
   echo "SKIPPING ALSA TWEAK"
 fi
 
+# change directory to newly created prefix
+cd "$HOME/Games/oldsu-wine"
 
 # dsound tweak
 print_sect "dsound tweak"
