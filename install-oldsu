@@ -49,7 +49,7 @@ export WINEARCH=win32
 
 
 # COMMANDS
-WINETRICKS_CREATE_PREFIX="$WINETRICKS -q dotnet45 cjkfonts gdiplus"
+WINETRICKS_CREATE_PREFIX="$WINETRICKS -q dotnet48 cjkfonts gdiplus"
 WINETRICKS_ALSA="$WINETRICKS sound=alsa"
 
 # Create wineprefix
