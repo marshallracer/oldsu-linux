@@ -4,7 +4,7 @@ An oldsu-wine installer, based on mrniceguy127's installer for regular osu! This
 
 # Instructions
 
-1. Install wine and winetricks. Additionally for the redirector, you need the [dotnet-runtime](https://docs.microsoft.com/en-us/dotnet/core/install/linux) package.
+1. Install wine and winetricks. Additionally for the redirector, you need the [dotnet-runtime-3.1](https://docs.microsoft.com/en-us/dotnet/core/install/linux) package.
 2. `git clone https://github.com/marshallracer/oldsu-wine-install-script.git`
 3. `cd oldsu-wine-install-script`
 4. `./install-oldsu` When you see the winecfg window pop up, make sure to follow the instructions shown in the terminal.
