@@ -99,11 +99,11 @@ if [[ -e "Compatibility.zip" ]]; then
   echo "oldsu! archive already downloaded!"
   echo "Extracting archive now."
   mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'Compatibility.zip' -d "$HOME/Games/oldsu/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  unzip 'Compatibility.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 else
   wget 'https://cdn.discordapp.com/attachments/762549718798041088/774364455214907432/Compatibility.zip'
   mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'Compatibility.zip' -d "$HOME/Games/oldsu/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  unzip 'Compatibility.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 fi
 
 "$WINE" "osu!flandremod.exe"
