@@ -9,7 +9,7 @@ An oldsu-wine installer, based on mrniceguy127's installer for regular osu! This
 3. `cd oldsu-wine-install-script`
 4. `./install-oldsu` When you see the winecfg window pop up, make sure to follow the instructions shown in the terminal.
   * If you want to use the alsa tweak (see guide linked at the top), do `ALSATWEAK="true" ./install-oldsu`. I made this an option because it gave me a lot of audio problems (extremely fast/staticy/distorted).
-5. Copy the redirector files from within the extracted oldsu! folder to the main oldsu! folder itself and launch the https-redirector with `dotnet flandre-https-linux.dll` from the terminal from within the oldsu! folder. This step will not be necessary in future versions of oldsu!
+5. Copy the redirector files from the `linux redirector` folder from within the oldsu! folder to the main oldsu! folder itself and launch the https-redirector with `dotnet flandre-https-linux.dll` from the terminal from within the oldsu! folder. This step will not be necessary in future versions of oldsu!
 6. Launch oldsu. You can either type `oldsu` in the command line, or if you like GUI's, you can just search "oldsu" in whatever application launcher you might have. Use the command `oldsukill` to force kill oldsu.
 
 You can also specifiy your own WINEPREFIX, WINESERVER, WINE, WINECFG, and WINETRICKS in your environment. Defaults are used otherwise of course. e.g. `WINEPREFIX="..." WINE="..." WINESERVER="..." WINECFG="..." ./install-oldsu`
