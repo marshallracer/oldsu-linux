@@ -36,4 +36,4 @@ I've included an example script in this repo that launches oldsu along with the 
 
 > Running /usr/bin/wineserver -w. This will hang until all wine processes in prefix=/home/user/oldsu-wine terminate
 
-Winetricks got stuck here forever multiple times while installing fonts. I never found out if it was ever able to complete. I ended up just doing this in a separate terminal everytime it got stuck: `WINEPREFIX="$HOME/Games/oldsu-wine" wineserver -k`.
+Winetricks got stuck here forever multiple times while installing .NET. I ended up just doing this in a separate terminal everytime it got stuck: `WINEPREFIX="$HOME/Games/oldsu-wine" wineserver -k`.
