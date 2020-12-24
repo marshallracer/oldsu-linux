@@ -4,13 +4,12 @@ An oldsu-wine installer, based on mrniceguy127's installer for regular osu! This
 
 # Instructions
 
-1. Install wine and winetricks. Additionally for the redirector, you need the [dotnet-runtime-3.1](https://docs.microsoft.com/en-us/dotnet/core/install/linux) package.
+1. Install wine and winetricks. This has been tested with the latest version of wine-staging 5.22 at the time of writing.
 2. `git clone https://github.com/marshallracer/oldsu-wine-install-script.git`
 3. `cd oldsu-wine-install-script`
 4. `./install-oldsu` When you see the winecfg window pop up, make sure to follow the instructions shown in the terminal. Keep in mind that because of the necessary dependencies installed through winetricks it WILL take a while to install everything.
   * If you want to use the alsa tweak (see guide linked at the top), do `ALSATWEAK="true" ./install-oldsu`. I made this an option because it gave me a lot of audio problems (extremely fast/staticy/distorted).
-5. Copy the redirector files from the `linux redirector` folder from within the oldsu! folder to the main oldsu! folder itself and launch the https-redirector with `dotnet flandre-https-linux.dll` from the terminal from within the oldsu! folder. This step will not be necessary in future versions of oldsu!
-6. Launch oldsu. You can either type `oldsu` in the command line, or if you like GUI's, you can just search "oldsu" in whatever application launcher you might have. Use the command `oldsukill` to force kill oldsu.
+5. Launch oldsu. You can either type `oldsu` in the command line, or if you like GUI's, you can just search "oldsu" in whatever application launcher you might have. Use the command `oldsukill` to force kill oldsu.
 
 You can also specifiy your own WINEPREFIX, WINESERVER, WINE, WINECFG, and WINETRICKS in your environment. Defaults are used otherwise of course. e.g. `WINEPREFIX="..." WINE="..." WINESERVER="..." WINECFG="..." ./install-oldsu`
 
