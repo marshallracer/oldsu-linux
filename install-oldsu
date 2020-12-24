@@ -23,7 +23,7 @@ print_sect () {
   echo $BORDER
 }
 
-# maybe change to a check that prompts to grab latest winetricks if not installed
+# maybe change to a check that prompts to grab latest winetricks if not installed if I find out how to do so
 print_sect "ATTENTION: THIS SCRIPT ASSUMES WINE AND WINETRICKS ARE ALREADY INSTALLED"
 
 
@@ -49,7 +49,7 @@ export WINEARCH=win32
 
 
 # COMMANDS
-WINETRICKS_CREATE_PREFIX="$WINETRICKS -q dotnet48 cjkfonts gdiplus"
+WINETRICKS_CREATE_PREFIX="$WINETRICKS -q --force dotnet48 cjkfonts gdiplus ffdshow quartz"
 WINETRICKS_ALSA="$WINETRICKS sound=alsa"
 
 # Create wineprefix
@@ -78,7 +78,6 @@ cd "$HOME/Games/oldsu-wine"
 # dsound tweak
 print_sect "dsound tweak"
 cat > dsound.reg << "EOF"
-
 Windows Registry Editor Version 5.00
 
 
@@ -95,15 +94,15 @@ EOF
 print_sect "oldsu! installer step. PLEASE CLOSE OLDSU WHEN LAUNCHED."
 # oldsu! Installer
 
-if [[ -e "Compatibility.zip" ]]; then
+if [[ -e "flandremod 1.4.zip" ]]; then
   echo "oldsu! archive already downloaded!"
   echo "Extracting archive now."
   mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'Compatibility.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  unzip 'flandremod 1.4.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 else
-  wget 'https://cdn.discordapp.com/attachments/762549718798041088/774364455214907432/Compatibility.zip'
+  wget -O 'flandremod 1.4.zip' 'https://eevee-sylveon.s-ul.eu/vSihnZdI'
   mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'Compatibility.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  unzip 'flandremod 1.4.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 fi
 
 "$WINE" "osu!flandremod.exe"
@@ -204,3 +203,4 @@ rm -r "$TMP_DIR"
 
 # Finished!
 print_sect "Finished! Please report any issues with this script at https://github.com/marshallracer/osu-wine-install-script"
+
