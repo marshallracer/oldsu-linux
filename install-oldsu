@@ -94,15 +94,15 @@ EOF
 print_sect "oldsu! installer step. PLEASE CLOSE OLDSU WHEN LAUNCHED."
 # oldsu! Installer
 
-if [[ -e "flandremod 1.4.zip" ]]; then
+if [[ -e "stable.zip" ]]; then
   echo "oldsu! archive already downloaded!"
   echo "Extracting archive now."
   mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'flandremod 1.4.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  unzip 'stable.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 else
-  wget -O 'flandremod 1.4.zip' 'https://eevee-sylveon.s-ul.eu/vSihnZdI'
+  wget -O 'stable.zip' 'https://oldsu.ayyeve.xyz/releases/stable.zip'
   mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'flandremod 1.4.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  unzip 'stable.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 fi
 
 "$WINE" "osu!flandremod.exe"
