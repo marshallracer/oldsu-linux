@@ -1,15 +1,5 @@
 #!/bin/bash
 
-
-#set -e # play it safe      # Causes problems apparently...
-
-echo "ROOT IS REQUIRED TO ADD OLDSU TO /usr/bin and /usr/share"
-sudo echo "Thanks!"
-
-if [[ $? != 0 ]] ; then
-  exit
-fi
-
 TMP_DIR="/tmp/oldsu-wine"
 mkdir -p "$TMP_DIR"
 cd "$TMP_DIR" # Create tmp files here.
@@ -23,38 +13,58 @@ print_sect () {
   echo $BORDER
 }
 
-# maybe change to a check that prompts to grab latest winetricks if not installed if I find out how to do so
-print_sect "ATTENTION: THIS SCRIPT ASSUMES WINE AND WINETRICKS ARE ALREADY INSTALLED"
+
+# thanks to j4yden for dep-checks
+echo "Checking to see if wine and winetricks are installed..."
+
+if [ ! command -v wine &> /dev/null ]; then
+  echo "Wine is not installed! Exiting."
+  exit 1
+fi
+
+if [ ! command -v winetricks &> /dev/null ]; then
+  echo "Winetricks is not installed! Exiting."
+  exit 1
+fi
+
+if [ ! command -v wget &> /dev/null ]; then
+  echo "wget is not installed! Exiting."
+  exit 1
+fi
+
+if [ ! command -v curl &> /dev/null ]; then
+  echo "curl is not installed! Exiting."
+  exit 1
+fi
 
 
-
-# Wine environ
+# set Wine environment variables for installation - change to your liking or needs before installation
 if [[ ! -n "$WINEPREFIX" ]] ; then
   export WINEPREFIX="$HOME/Games/oldsu-wine"
 fi
-if [[ ! -n "$WINE" ]] ; then
+if [[ ! -n "$WINE" ]]; then
   export WINE="wine"
 fi
-if [[ ! -n "$WINESERVER" ]] ; then
+if [[ ! -n "$WINESERVER" ]]; then
   export WINESERVER="wineserver"
 fi
-if [[ ! -n "$WINETRICKS" ]] ; then
+if [[ ! -n "$WINETRICKS" ]]; then
   export WINETRICKS="winetricks"
 fi
-if [[ ! -n "$WINECFG" ]] ; then
+if [[ ! -n "$WINECFG" ]]; then
   export WINECFG="winecfg"
+fi
+if [[ ! -n "$DISCORDRPC" ]]; then
+  export DISCORDRPC="true"
 fi
 export WINEARCH=win32
 
 
-
-# COMMANDS
-WINETRICKS_CREATE_PREFIX="$WINETRICKS -q --force dotnet48 cjkfonts gdiplus ffdshow quartz"
-WINETRICKS_ALSA="$WINETRICKS sound=alsa"
-
 # Create wineprefix
 print_sect "CREATING WINEPREFIX"
-$WINETRICKS_CREATE_PREFIX
+echo "If wine asks you to install wine mono or wine gecko, say no or cancel. This will cause problems later."
+$WINETRICKS --force dotnet45 # force flag for recent wine 5.x versions; no -q so the user knows whats happening
+$WINETRICKS -q cjkfonts gdiplus ffdshow quartz # fixes fonts, graphics and videos
 
 
 # Manual winecfg step
@@ -64,16 +74,19 @@ echo "See https://osu.ppy.sh/community/forums/topics/367783"
 
 "$WINECFG"
 
+read -n 1 -s -r -p "Press any key when you are done with this step."
+
 print_sect "ALSA"
 
 if [[ "$ALSATWEAK" == "true" ]]; then
-  $WINETRICKS_ALSA
+  $WINETRICKS sound=alsa
 else
-  echo "SKIPPING ALSA TWEAK"
+  echo "Skipping ALSA tweak."
 fi
 
+
 # change directory to newly created prefix
-cd "$HOME/Games/oldsu-wine"
+cd "$WINEPREFIX"
 
 # dsound tweak
 print_sect "dsound tweak"
@@ -91,21 +104,18 @@ EOF
 
 "$WINE" regedit dsound.reg
 
-print_sect "oldsu! installer step. PLEASE CLOSE OLDSU WHEN LAUNCHED."
 # oldsu! Installer
+print_sect "Installing oldsu!..."
 
 if [[ -e "stable.zip" ]]; then
-  echo "oldsu! archive already downloaded!"
-  echo "Extracting archive now."
-  mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'stable.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
+  echo "oldsu! archive already downloaded, if this is out of date either oldsu will update itself or you will need to remove stable.zip."
 else
+  echo "Downloading archive..."
   wget -O 'stable.zip' 'https://oldsu.ayyeve.xyz/releases/stable.zip'
-  mkdir "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
-  unzip 'stable.zip' -d "$HOME/Games/oldsu-wine/drive_c/users/$USER/Local Settings/Application Data/oldsu!"
 fi
-
-"$WINE" "osu!flandremod.exe"
+echo "Extracting archive..."
+mkdir "$WINEPREFIX/drive_c/oldsu"
+unzip 'stable.zip' -d "$WINEPREFIX/drive_c/oldsu"
 
 
 print_sect "POST INSTALL STEPS"
@@ -113,60 +123,49 @@ print_sect "POST INSTALL STEPS"
 OLDSU_SC_PATH="$HOME/Games/oldsu"
 
 if [[ ! -e $OLDSU_SC_PATH ]] ; then
-  ln -sv "$WINEPREFIX/drive_c/users/$USER/Local Settings/Application Data/oldsu!" "$OLDSU_SC_PATH"
+  ln -sv "$WINEPREFIX/drive_c/oldsu" "$OLDSU_SC_PATH"
   echo "Created oldsu! folder shortcut in current user's home."
 fi
 
 # Launch script
-
-print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU TO /usr/bin"
-
 cat > oldsu << "EOF"
 #!/bin/sh
-
-
 export vblank_mode=0
-
 export WINEARCH=win32
-
 EOF
 
 echo "export WINEPREFIX=\"$WINEPREFIX\""  >> oldsu
-echo "\"$WINE\" \"$WINEPREFIX/drive_c/users/\$USER/Local Settings/Application Data/oldsu!/osu!flandremod.exe\" \"\$@\"" >> oldsu
 
+print_sect "Discord RPC"
+if [[ "$DISCORDRPC" == "true" ]]; then
+  echo "Downloading Discord RPC bridge..."
+  curl -O -J -L 'https://github.com/0e4ef622/wine-discord-ipc-bridge/releases/download/v0.0.1/winediscordipcbridge.exe'
+  mv "winediscordipcbridge.exe" "$WINEPREFIX/drive_c/oldsu/"
+  echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/winediscordipcbridge.exe\" &" >> oldsu
+else
+  echo "Skipping Discord RPC install."
+fi
 
-sudo mv oldsu /usr/bin/oldsu
-sudo chmod +x /usr/bin/oldsu
+echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/osu!flandremod.exe\" \"\$@\"" >> oldsu
 
-
+mv oldsu $HOME/.bin/oldsu
+chmod +x $HOME/.bin/oldsu
 
 # Kill script
 cat > oldsukill << "EOF"
 #!/bin/sh
-
-
-export vblank_mode=0
-
 export WINEARCH=win32
-
 EOF
 
 echo "export WINEPREFIX=\"$WINEPREFIX\"" >> oldsukill
 echo "\"$WINESERVER\" -k" >> oldsukill
 
-
-sudo mv oldsukill /usr/bin/oldsukill
-sudo chmod +x /usr/bin/oldsukill
-
-
-
-print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU DESKTOP FILE TO /usr/share"
+mv oldsukill $HOME/.bin/oldsukill
+chmod +x $HOME/.bin/oldsukill
 
 # Desktop file
-
 OLDSU_LOGO_URL="https://cdn.discordapp.com/attachments/762549406091575309/783088957776461824/oldsu.png"
-
-sudo wget "$OLDSU_LOGO_URL" -O "/usr/share/icons/oldsulogo.png"
+wget "$OLDSU_LOGO_URL" -O "$HOME/.local/share/icons/oldsulogo.png"
 
 cat > "oldsu!.desktop" << "EOF"
 [Desktop Entry]
@@ -185,21 +184,16 @@ Icon=oldsulogo
 
 StartupWMClass=osu!flandremod.exe
 
-Categories=
+Categories=Games
 
 EOF
 
-sudo mv "oldsu!.desktop" "/usr/share/applications"
-sudo chmod +x "/usr/share/applications/oldsu!.desktop"
-
-
-
-
+mv "oldsu!.desktop" "$HOME/.local/share/applications"
+chmod +x "$HOME/.local/share/applications/oldsu!.desktop"
 
 # Cleanup
 cd /tmp
 rm -r "$TMP_DIR"
-
 
 # Finished!
 print_sect "Finished! Please report any issues with this script at https://github.com/marshallracer/osu-wine-install-script"
