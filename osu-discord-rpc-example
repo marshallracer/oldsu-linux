@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export WINEPREFIX="$HOME/oldsu-wine"
-
-wine winediscordipcbridge.exe &
-
-oldsu
