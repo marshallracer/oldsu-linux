@@ -128,6 +128,7 @@ if [[ ! -e $OLDSU_SC_PATH ]] ; then
 fi
 
 # Launch script
+print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU TO /usr/bin"
 cat > oldsu << "EOF"
 #!/bin/sh
 export vblank_mode=0
@@ -148,8 +149,8 @@ fi
 
 echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/osu!flandremod.exe\" \"\$@\"" >> oldsu
 
-mv oldsu $HOME/.bin/oldsu
-chmod +x $HOME/.bin/oldsu
+mv oldsu /usr/bin/oldsu
+chmod +x /usr/bin/oldsu
 
 # Kill script
 cat > oldsukill << "EOF"
@@ -160,8 +161,8 @@ EOF
 echo "export WINEPREFIX=\"$WINEPREFIX\"" >> oldsukill
 echo "\"$WINESERVER\" -k" >> oldsukill
 
-mv oldsukill $HOME/.bin/oldsukill
-chmod +x $HOME/.bin/oldsukill
+mv oldsukill /usr/bin/oldsukill
+chmod +x /usr/bin/oldsukill
 
 # Desktop file
 OLDSU_LOGO_URL="https://cdn.discordapp.com/attachments/762549406091575309/783088957776461824/oldsu.png"
@@ -197,4 +198,3 @@ rm -r "$TMP_DIR"
 
 # Finished!
 print_sect "Finished! Please report any issues with this script at https://github.com/marshallracer/osu-wine-install-script"
-
