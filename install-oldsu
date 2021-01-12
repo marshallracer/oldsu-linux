@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo "ROOT IS REQUIRED TO ADD OSU TO /usr/bin and /usr/share"
+sudo echo "Thanks!"
+
+if [[ $? != 0 ]] ; then
+  exit
+fi
+
 TMP_DIR="/tmp/oldsu-wine"
 mkdir -p "$TMP_DIR"
 cd "$TMP_DIR" # Create tmp files here.
@@ -128,7 +135,6 @@ if [[ ! -e $OLDSU_SC_PATH ]] ; then
 fi
 
 # Launch script
-print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU TO /usr/bin"
 cat > oldsu << "EOF"
 #!/bin/sh
 export vblank_mode=0
@@ -149,8 +155,9 @@ fi
 
 echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/osu!flandremod.exe\" \"\$@\"" >> oldsu
 
-mv oldsu /usr/bin/oldsu
-chmod +x /usr/bin/oldsu
+print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU TO /usr/bin"
+sudo mv oldsu /usr/bin/oldsu
+sudo chmod +x /usr/bin/oldsu
 
 # Kill script
 cat > oldsukill << "EOF"
@@ -161,8 +168,8 @@ EOF
 echo "export WINEPREFIX=\"$WINEPREFIX\"" >> oldsukill
 echo "\"$WINESERVER\" -k" >> oldsukill
 
-mv oldsukill /usr/bin/oldsukill
-chmod +x /usr/bin/oldsukill
+sudo mv oldsukill /usr/bin/oldsukill
+sudo chmod +x /usr/bin/oldsukill
 
 # Desktop file
 OLDSU_LOGO_URL="https://cdn.discordapp.com/attachments/762549406091575309/783088957776461824/oldsu.png"
