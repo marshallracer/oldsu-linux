@@ -21,7 +21,7 @@ print_sect () {
 }
 
 
-# thanks to j4yden for dep-checks
+# thanks to jvyden for dep-checks
 echo "Checking to see if wine and winetricks are installed..."
 
 if [ ! command -v wine &> /dev/null ]; then
@@ -58,9 +58,6 @@ fi
 if [[ ! -n "$WINETRICKS" ]]; then
   export WINETRICKS="winetricks"
 fi
-if [[ ! -n "$WINECFG" ]]; then
-  export WINECFG="winecfg"
-fi
 if [[ ! -n "$DISCORDRPC" ]]; then
   export DISCORDRPC="true"
 fi
@@ -72,24 +69,6 @@ print_sect "CREATING WINEPREFIX"
 echo "If wine asks you to install wine mono or wine gecko, say no or cancel. This will cause problems later."
 $WINETRICKS --force dotnet45 # force flag for recent wine 5.x versions; no -q so the user knows whats happening
 $WINETRICKS -q cjkfonts gdiplus ffdshow quartz # fixes fonts, graphics and videos
-
-
-# Manual winecfg step
-print_sect "MANUAL STEP"
-echo "> \"navigate to graphics and ensure that "allow the window manager to decorate the windows" and "allow the window manager to control the windows" are enabled. this can allow native fullscreen to work which can help performance on bloated desktop environments like gnome\""
-echo "See https://osu.ppy.sh/community/forums/topics/367783"
-
-"$WINECFG"
-
-read -n 1 -s -r -p "Press any key when you are done with this step."
-
-print_sect "ALSA"
-
-if [[ "$ALSATWEAK" == "true" ]]; then
-  $WINETRICKS sound=alsa
-else
-  echo "Skipping ALSA tweak."
-fi
 
 
 # change directory to newly created prefix
@@ -142,6 +121,7 @@ export WINEARCH=win32
 EOF
 
 echo "export WINEPREFIX=\"$WINEPREFIX\""  >> oldsu
+echo "cd \"$WINEPREFIX/drive_c/oldsu\"" >> oldsu
 
 print_sect "Discord RPC"
 if [[ "$DISCORDRPC" == "true" ]]; then
