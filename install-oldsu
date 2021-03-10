@@ -190,4 +190,4 @@ cd /tmp
 rm -r "$TMP_DIR"
 
 # Finished!
-print_sect "Finished! Please report any issues with this script at https://github.com/marshallracer/osu-wine-install-script"
+print_sect "Finished! Please report any issues with this script at https://github.com/marshallracer/oldsu-linux"
