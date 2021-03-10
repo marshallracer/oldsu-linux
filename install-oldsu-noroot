@@ -13,25 +13,21 @@ print_sect () {
   echo $BORDER
 }
 
-# thanks to jvyden for dep-checks
-echo "Checking to see if wine and winetricks are installed..."
-if [ ! command -v wine &> /dev/null ]; then
-  echo "Wine is not installed! Exiting."
-  exit 1
-fi
-if [ ! command -v winetricks &> /dev/null ]; then
-  echo "Winetricks is not installed! Exiting."
-  exit 1
-fi
-if [ ! command -v wget &> /dev/null ]; then
-  echo "wget is not installed! Exiting."
-  exit 1
-fi
-if [ ! command -v curl &> /dev/null ]; then
-  echo "curl is not installed! Exiting."
-  exit 1
-fi
+# jvyden's dep-checks method has been replaced
+echo -e "Checking if dependencies are installed...\n"
 
+for i in $(cat dependencies.list); do
+	which $i > /dev/null
+	if [[ $? == "1" ]]; then
+		echo "Dependency \"$i\" not found"
+		missing_deps=true
+	fi
+done
+
+if [[ $missing_deps ]]; then
+	echo -e "\nInstall missing dependencies and try again"
+	exit 1
+fi
 
 # set Wine environment variables for installation - change to your liking or needs before installation
 if [[ ! -n "$WINEPREFIX" ]] ; then
