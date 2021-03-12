@@ -7,7 +7,7 @@ An oldsu-wine installer, based on mrniceguy127's installer for regular osu! This
 1. Install wine and winetricks. This has been tested with the latest version of wine-staging 5.22 at the time of writing.
 2. `git clone https://github.com/marshallracer/oldsu-linux`
 3. `cd oldsu-linux`
-4. `./install-oldsu` Keep in mind that because of the necessary dependencies installed through winetricks it WILL take a while to install everything.
+4. `./install-oldsu` (or `./install-oldsu --no-root` if you want use the noroot version of oldsu installer script) Keep in mind that because of the necessary dependencies installed through winetricks it WILL take a while to install everything.
 5. Launch oldsu. You can either type `oldsu` in the command line, or if you like GUI's, you can just search "oldsu" in whatever application launcher you might have. Use the command `oldsukill` to force kill oldsu.
 > should you use the noroot script keep in mind to add the new folder to your $PATH (e.g. `nano $HOME/.bashrc`): `export PATH=$HOME/.local/bin:$PATH`
 
