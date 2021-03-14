@@ -4,22 +4,39 @@
 echo -e "Checking if dependencies are installed...\n"
 
 for i in $(cat dependencies.list); do
-        which $i > /dev/null
-        if [[ $? == "1" ]]; then
-                echo "Dependency \"$i\" not found"
-                missing_deps=true
-        fi
+	which $i > /dev/null
+	if [[ $? == "1" ]]; then
+		echo "Dependency \"$i\" not found"
+		missing_deps=true
+	fi
 done
 
 if [[ $missing_deps ]]; then
-        echo -e "\nInstall missing dependencies and try again"
-        exit 1
+	echo -e "\nInstall missing dependencies and try again"
+	exit 1
+fi
+
+if [[ $(uname) == "Linux" ]]; then
+  os="linux"
+elif [[ $(uname) == "Darwin" ]]; then
+  os="mac"
+else
+  echo "Your system is not supported by oldsu-install"
+  exit 1
 fi
 
 if [[ $1 && $1 == "--no-root" ]]; then
-  no_root=true
+  if [[ $os == "mac" ]]; then
+    no_root="mac"
+  else
+    no_root=true
+  fi
 else
-  no_root=false
+  if [[ $os == "mac" ]]; then
+    no_root="mac"
+  else
+    no_root=false
+  fi
 fi
 
 if [[ $no_root == "false" ]]; then
@@ -130,12 +147,20 @@ if [[ "$DISCORDRPC" == "true" ]]; then
   echo "Downloading Discord RPC bridge..."
   curl -O -J -L 'https://github.com/0e4ef622/wine-discord-ipc-bridge/releases/download/v0.0.1/winediscordipcbridge.exe'
   mv "winediscordipcbridge.exe" "$WINEPREFIX/drive_c/oldsu/"
-  echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/winediscordipcbridge.exe\" &" >> oldsu
+  if [[ $os == "linux" ]]; then
+    echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/winediscordipcbridge.exe\" &" >> oldsu
+  elif [[ $os == "mac" ]]; then
+  	echo "exec $(which wine) \"$WINEPREFIX/drive_c/oldsu/winediscordipcbridge.exe\" &" >> oldsu
+  fi
 else
   echo "Skipping Discord RPC install."
 fi
 
-echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/osu!flandremod.exe\" \"\$@\"" >> oldsu
+if [[ $os == "linux" ]]; then
+  echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/osu!flandremod.exe\" \"\$@\"" >> oldsu
+elif [[ $os == "mac" ]]; then
+  echo "exec $(which wine) \"$WINEPREFIX/drive_c/oldsu/osu!flandremod.exe\" \"\$@\"" >> oldsu
+fi
 
 if [[ $no_root == "true" ]]; then
   # creating bin folder in .local to avoid use of root in case it doesn't exist
@@ -143,10 +168,60 @@ if [[ $no_root == "true" ]]; then
   mkdir -p "$HOME/.local/bin/"
   mv oldsu $HOME/.local/bin/oldsu
   chmod +x $HOME/.local/bin/oldsu
-else
+elif [[ $no_root == "false" ]]; then
   print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU TO /usr/bin"
   sudo mv oldsu /usr/bin/oldsu
   sudo chmod +x /usr/bin/oldsu
+elif [[ $no_root == "mac" ]]; then
+  version=$(curl -s "https://oldsu.ayyeve.xyz/branches.txt" | cut -d '|' -f 2)
+
+  if [[ ! $version ]]; then
+    version="1.0.0"
+  fi
+
+  mkdir -p /Applications/oldsu\!.app/Contents/MacOS
+  mkdir -p /Applications/oldsu\!.app/Contents/Resources
+
+  mv oldsu /Applications/oldsu\!.app/Contents/MacOS/oldsu
+  chmod +x /Applications/oldsu\!.app/Contents/MacOS/oldsu
+
+  image=$(wget "https://cdn.discordapp.com/attachments/820714412649349212/820714471638040616/oldsu.icns" -O oldsu.icns)
+  mv oldsu.icns /Applications/oldsu\!.app/Contents/Resources/oldsu.icns
+
+  cat <<EOF > /Applications/oldsu\!.app/Contents/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>oldsu</string>
+	<key>CFBundleIdentifier</key>
+	<string>xyz.ayyeve.oldsu</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>oldsu</string>
+	<key>CFBundleDisplayName</key>
+	<string>oldsu!</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$version</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleIconFile</key>
+	<string>oldsu.icns</string>
+	<key>LSExecutableArchitectures</key>
+	<array>
+		<string>x86_64</string>
+	</array>
+</dict>
+</plist>
+EOF
 fi
 
 # Kill script
@@ -161,16 +236,17 @@ echo "\"$WINESERVER\" -k" >> oldsukill
 if [[ $no_root == "true" ]]; then
   mv oldsukill $HOME/.local/bin/oldsukill
   chmod +x $HOME/.local/bin/oldsukill
-else
+elif [[ $no_root == "false" ]]; then
   sudo mv oldsukill /usr/bin/oldsukill
   sudo chmod +x /usr/bin/oldsukill
 fi
 
-# Desktop file
-OLDSU_LOGO_URL="https://cdn.discordapp.com/attachments/762549406091575309/783088957776461824/oldsu.png"
-wget "$OLDSU_LOGO_URL" -O "$HOME/.local/share/icons/oldsulogo.png"
+if [[ $os == "linux" ]]; then
+  # Desktop file
+  OLDSU_LOGO_URL="https://cdn.discordapp.com/attachments/762549406091575309/783088957776461824/oldsu.png"
+  wget "$OLDSU_LOGO_URL" -O "$HOME/.local/share/icons/oldsulogo.png"
 
-cat > "oldsu!.desktop" << "EOF"
+	cat > "oldsu!.desktop" << "EOF"
 [Desktop Entry]
 Encoding=UTF-8
 Name=oldsu!
@@ -181,10 +257,9 @@ Icon=oldsulogo
 StartupWMClass=osu!flandremod.exe
 Categories=Games
 EOF
-
-mv "oldsu!.desktop" "$HOME/.local/share/applications"
-chmod +x "$HOME/.local/share/applications/oldsu!.desktop"
-
+  mv "oldsu!.desktop" "$HOME/.local/share/applications"
+  chmod +x "$HOME/.local/share/applications/oldsu!.desktop"
+fi
 # Cleanup
 cd /tmp
 rm -r "$TMP_DIR"
