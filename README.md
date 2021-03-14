@@ -7,8 +7,8 @@ An oldsu-wine installer, based on mrniceguy127's installer for regular osu! This
 1. Install wine and winetricks. This has been tested with wine-staging 5.22 at the time of writing. Newer versions should also work fine but mileage may vary.
 2. `git clone https://github.com/marshallracer/oldsu-linux`
 3. `cd oldsu-linux`
-4. `./install-oldsu` (or `./install-oldsu --no-root` if you want use the noroot version of oldsu installer script) Keep in mind that because of the necessary dependencies installed through winetricks it WILL take a while to install everything.
-5. Launch oldsu. You can either type `oldsu` in the command line, or if you like GUI's, you can just search "oldsu" in whatever application launcher you might have. Use the command `oldsukill` to force kill oldsu.
+4. `./install-oldsu` (linux only: or `./install-oldsu --no-root` if you want use the noroot version of oldsu installer script) Keep in mind that because of the necessary dependencies installed through winetricks it WILL take a while to install everything.
+5. Launch oldsu. You can either type `oldsu` in the command line, or if you like GUI's, you can just search "oldsu" in whatever application launcher you might have. Use the command `oldsukill` to force kill oldsu. If you have macOS - you will find oldsu! in Launchpad.
 > should you use the noroot script keep in mind to add the new folder to your $PATH (e.g. `nano $HOME/.bashrc`): `export PATH=$HOME/.local/bin:$PATH`
 
 You can also specifiy your own WINEPREFIX, WINESERVER, WINE and WINETRICKS in your environment. Defaults are used otherwise of course. e.g. `WINEPREFIX="..." WINE="..." WINESERVER="..." ./install-oldsu`
@@ -23,7 +23,7 @@ Thanks to jvyden for their code which includes discordrpc during the install. It
 
 - Default WINEPREFIX: `~/Games/oldsu-wine`
 - oldsu! folder shortcut: `~/Games/oldsu`
-- oldsu! launch script: `/usr/bin/oldsu` (root) or `~/.local/bin/oldsu` (no-root)
+- oldsu! launch script: `/usr/bin/oldsu` (root) or `~/.local/bin/oldsu` (no-root) or `/Applications/oldsu\!.app/Contents/MacOS/oldsu` (macOS)
 - oldsu! kill script: `/usr/bin/oldsukill` (root) or `~/.local/bin/oldsukill` (no-root)
 - oldsu! desktop file: `~/.local/share/applications/oldsu!.desktop`
 - oldsu! logo file: `~/.local/share/icons/oldsulogo.png`
