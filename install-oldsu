@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# jvyden's dep-checks method has been replaced
+echo -e "Checking if dependencies are installed...\n"
+
+for i in $(cat dependencies.list); do
+        which $i > /dev/null
+        if [[ $? == "1" ]]; then
+                echo "Dependency \"$i\" not found"
+                missing_deps=true
+        fi
+done
+
+if [[ $missing_deps ]]; then
+        echo -e "\nInstall missing dependencies and try again"
+        exit 1
+fi
+
 if [[ $1 && $1 == "--no-root" ]]; then
   no_root=true
 else
@@ -27,22 +43,6 @@ print_sect () {
   echo "$1"
   echo $BORDER
 }
-
-# jvyden's dep-checks method has been replaced
-echo -e "Checking if dependencies are installed...\n"
-
-for i in $(cat dependencies.list); do
-	which $i > /dev/null
-	if [[ $? == "1" ]]; then
-		echo "Dependency \"$i\" not found"
-		missing_deps=true
-	fi
-done
-
-if [[ $missing_deps ]]; then
-	echo -e "\nInstall missing dependencies and try again"
-	exit 1
-fi
 
 # set Wine environment variables for installation - change to your liking or needs before installation
 if [[ ! -n "$WINEPREFIX" ]] ; then
