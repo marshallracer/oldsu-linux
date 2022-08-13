@@ -1,0 +1,275 @@
+#!/bin/bash
+
+# jvyden's dep-checks method has been replaced
+echo -e "Checking if dependencies are installed...\n"
+
+for i in $(cat dependencies.list); do
+	which $i > /dev/null
+	if [[ $? == "1" ]]; then
+		echo "Dependency \"$i\" not found"
+		missing_deps=true
+	fi
+done
+
+if [[ $missing_deps ]]; then
+	echo -e "\nInstall missing dependencies and try again"
+	exit 1
+fi
+
+if [[ $(uname) == "Linux" ]]; then
+  os="linux"
+elif [[ $(uname) == "Darwin" ]]; then
+  os="mac"
+else
+  echo "Your system is not supported by oldsu-install"
+  exit 1
+fi
+
+if [[ $1 && $1 == "--no-root" ]]; then
+  if [[ $os == "mac" ]]; then
+    no_root="mac"
+  else
+    no_root=true
+  fi
+else
+  if [[ $os == "mac" ]]; then
+    no_root="mac"
+  else
+    no_root=false
+  fi
+fi
+
+if [[ $no_root == "false" ]]; then
+  echo "ROOT IS REQUIRED TO ADD OSU TO /usr/bin and /usr/share"
+  sudo echo "Thanks!"
+
+  if [[ $? != 0 ]] ; then
+    exit
+  fi
+fi
+
+TMP_DIR="/tmp/oldsu-wine"
+mkdir -p "$TMP_DIR"
+cd "$TMP_DIR" # Create tmp files here.
+
+# Styling
+BORDER="========================================================================"
+
+print_sect () {
+  echo $BORDER
+  echo "$1"
+  echo $BORDER
+}
+
+# set Wine environment variables for installation - change to your liking or needs before installation
+if [[ ! -n "$WINEPREFIX" ]] ; then
+  export WINEPREFIX="$HOME/Games/oldsu-wine"
+fi
+if [[ ! -n "$WINE" ]]; then
+  export WINE="wine"
+fi
+if [[ ! -n "$WINESERVER" ]]; then
+  export WINESERVER="wineserver"
+fi
+if [[ ! -n "$WINETRICKS" ]]; then
+  export WINETRICKS="winetricks"
+fi
+if [[ ! -n "$DISCORDRPC" ]]; then
+  export DISCORDRPC="true"
+fi
+export WINEARCH=win32
+
+
+# Create wineprefix
+print_sect "CREATING WINEPREFIX"
+echo "If wine asks you to install wine mono or wine gecko, say no or cancel. This will cause problems later."
+$WINETRICKS --force dotnet45 # force flag for recent wine 5.x versions; no -q so the user knows whats happening
+$WINETRICKS -q cjkfonts gdiplus # fixes fonts, graphics (if videos are broken, re-add ffdshow and quartz to this install)
+
+print_sect "ALSA"
+if [[ "$ALSATWEAK" == "true" ]]; then
+  $WINETRICKS sound=alsa
+else
+  echo "Skipping ALSA tweak."
+fi
+
+# change directory to newly created prefix
+cd "$WINEPREFIX"
+
+# dsound tweak
+print_sect "dsound tweak"
+cat > dsound.reg << "EOF"
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Wine\DirectSound]
+"HelBuflen"="512"
+"SndQueueMax"="3"
+EOF
+
+"$WINE" regedit dsound.reg
+
+# oldsu! Installer
+print_sect "Installing oldsu!..."
+
+if [[ -e "b904.7z" ]]; then
+  echo "Client archive already downloaded."
+else
+  echo "Downloading archive..."
+  wget -O 'b904.7z' 'https://osekai.net/snapshots/versions/b904/b904.7z'
+fi
+if [[ -e "release.zip" ]]; then
+  echo "Patch has already been downloaded. If this is out of date you will need to remove release.zip."
+else
+  echo "Downloading patch..."
+  wget -O 'release.zip' 'https://cdn.discordapp.com/attachments/762549718798041088/988858691056971836/release.zip'
+fi
+echo "Extracting archives..."
+mkdir "$WINEPREFIX/drive_c/oldsu"
+7z x 'b904.7z' -o"$WINEPREFIX/drive_c/oldsu"
+unzip -o 'release.zip' -d "$WINEPREFIX/drive_c/oldsu"
+
+
+print_sect "POST INSTALL STEPS"
+# Post install
+OLDSU_SC_PATH="$HOME/Games/oldsu"
+
+if [[ ! -e $OLDSU_SC_PATH ]] ; then
+  ln -sv "$WINEPREFIX/drive_c/oldsu" "$OLDSU_SC_PATH"
+  echo "Created oldsu! folder shortcut in current user's home."
+fi
+
+# Launch script
+cat > oldsu << "EOF"
+#!/bin/sh
+export vblank_mode=0
+export __GL_SYNC_TO_VBLANK=0
+export WINEARCH=win32
+EOF
+
+echo "export WINEPREFIX=\"$WINEPREFIX\""  >> oldsu
+echo "cd \"$WINEPREFIX/drive_c/oldsu\"" >> oldsu
+
+print_sect "Discord RPC"
+if [[ "$DISCORDRPC" == "true" ]]; then
+  echo "Downloading Discord RPC bridge..."
+  curl -O -J -L 'https://github.com/0e4ef622/wine-discord-ipc-bridge/releases/download/v0.0.1/winediscordipcbridge.exe'
+  mv "winediscordipcbridge.exe" "$WINEPREFIX/drive_c/oldsu/"
+  if [[ $os == "linux" ]]; then
+    echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/winediscordipcbridge.exe\" &" >> oldsu
+  elif [[ $os == "mac" ]]; then
+  	echo "exec $(which wine) \"$WINEPREFIX/drive_c/oldsu/winediscordipcbridge.exe\" &" >> oldsu
+  fi
+else
+  echo "Skipping Discord RPC install."
+fi
+
+if [[ $os == "linux" ]]; then
+  echo "\"$WINE\" \"$WINEPREFIX/drive_c/oldsu/osu!.exe\" \"\$@\"" >> oldsu
+elif [[ $os == "mac" ]]; then
+  echo "exec $(which wine) \"$WINEPREFIX/drive_c/oldsu/osu!.exe\" \"\$@\"" >> oldsu
+fi
+
+if [[ $no_root == "true" ]]; then
+  # creating bin folder in .local to avoid use of root in case it doesn't exist
+  # remember to add the folder to your $PATH by issuing "export PATH=$HOME/.local/bin:$PATH" in a terminal
+  mkdir -p "$HOME/.local/bin/"
+  mv oldsu $HOME/.local/bin/oldsu
+  chmod +x $HOME/.local/bin/oldsu
+elif [[ $no_root == "false" ]]; then
+  print_sect "REQUESTING ROOT ACCESS TO ADD OLDSU TO /usr/bin"
+  sudo mv oldsu /usr/bin/oldsu
+  sudo chmod +x /usr/bin/oldsu
+elif [[ $no_root == "mac" ]]; then
+  version=$(curl -s "https://oldsu.ayyeve.xyz/branches.txt" | cut -d '|' -f 2)
+
+  if [[ ! $version ]]; then
+    version="1.0.0"
+  fi
+
+  mkdir -p /Applications/oldsu\!.app/Contents/MacOS
+  mkdir -p /Applications/oldsu\!.app/Contents/Resources
+
+  mv oldsu /Applications/oldsu\!.app/Contents/MacOS/oldsu
+  chmod +x /Applications/oldsu\!.app/Contents/MacOS/oldsu
+
+  image=$(wget "https://cdn.discordapp.com/attachments/820714412649349212/820714471638040616/oldsu.icns" -O oldsu.icns)
+  mv oldsu.icns /Applications/oldsu\!.app/Contents/Resources/oldsu.icns
+
+  cat <<EOF > /Applications/oldsu\!.app/Contents/Info.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>oldsu</string>
+	<key>CFBundleIdentifier</key>
+	<string>xyz.ayyeve.oldsu</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>oldsu</string>
+	<key>CFBundleDisplayName</key>
+	<string>oldsu!</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$version</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleIconFile</key>
+	<string>oldsu.icns</string>
+	<key>LSExecutableArchitectures</key>
+	<array>
+		<string>x86_64</string>
+	</array>
+</dict>
+</plist>
+EOF
+fi
+
+# Kill script
+cat > oldsukill << "EOF"
+#!/bin/sh
+export WINEARCH=win32
+EOF
+
+echo "export WINEPREFIX=\"$WINEPREFIX\"" >> oldsukill
+echo "\"$WINESERVER\" -k" >> oldsukill
+
+if [[ $no_root == "true" ]]; then
+  mv oldsukill $HOME/.local/bin/oldsukill
+  chmod +x $HOME/.local/bin/oldsukill
+elif [[ $no_root == "false" ]]; then
+  sudo mv oldsukill /usr/bin/oldsukill
+  sudo chmod +x /usr/bin/oldsukill
+fi
+
+if [[ $os == "linux" ]]; then
+  # Desktop file
+  OLDSU_LOGO_URL="https://cdn.discordapp.com/attachments/762549406091575309/783088957776461824/oldsu.png"
+  wget "$OLDSU_LOGO_URL" -O "$HOME/.local/share/icons/oldsulogo.png"
+
+	cat > "oldsu!.desktop" << "EOF"
+[Desktop Entry]
+Encoding=UTF-8
+Name=oldsu!
+Comment=Travel back in time! Launch the 2008 o(ld)su! client.
+Type=Application
+Exec=oldsu %F
+Icon=oldsulogo
+StartupWMClass=osu!flandremod.exe
+Categories=Games
+EOF
+  mv "oldsu!.desktop" "$HOME/.local/share/applications"
+  chmod +x "$HOME/.local/share/applications/oldsu!.desktop"
+fi
+# Cleanup
+cd /tmp
+rm -r "$TMP_DIR"
+
+# Finished!
+print_sect "Finished! Please report any issues with this script at https://github.com/marshallracer/oldsu-linux"
